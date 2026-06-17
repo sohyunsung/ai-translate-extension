@@ -1,0 +1,41 @@
+{
+  "manifest_version": 3,
+  "name": "Bedrock 번역기",
+  "version": "1.0.0",
+  "description": "AWS Bedrock(Nova/Claude)로 드래그 선택 번역, 전체 번역, 원본+번역 비교 보기를 제공합니다.",
+  "permissions": ["storage", "unlimitedStorage", "contextMenus", "scripting", "activeTab"],
+  "host_permissions": [
+    "https://*.amazonaws.com/*",
+    "https://*.awsapps.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "commands": {
+    "translate-page": {
+      "suggested_key": { "default": "Ctrl+Shift+Y", "mac": "Command+Shift+Y" },
+      "description": "전체 번역 (원본 대체)"
+    },
+    "translate-dual": {
+      "suggested_key": { "default": "Ctrl+Shift+K", "mac": "Command+Shift+K" },
+      "description": "전체 번역 (원문+번역)"
+    },
+    "translate-selection": {
+      "suggested_key": { "default": "Ctrl+Shift+U", "mac": "Command+Shift+U" },
+      "description": "선택 영역 번역"
+    }
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Bedrock 번역기"
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

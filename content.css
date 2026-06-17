@@ -1,0 +1,117 @@
+/* content.css — 확장프로그램 UI 전용 스타일 (페이지와 충돌 최소화) */
+
+.bedrock-tr-floatbtn {
+  position: absolute;
+  z-index: 2147483646;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  user-select: none;
+  line-height: 1.4;
+}
+.bedrock-tr-floatbtn:hover {
+  background: #1d4ed8;
+}
+
+.bedrock-tr-bubble {
+  position: absolute;
+  z-index: 2147483647;
+  max-width: 380px;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+  padding: 12px 14px 14px;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.bedrock-tr-close {
+  position: absolute;
+  top: 4px;
+  right: 8px;
+  cursor: pointer;
+  color: #9ca3af;
+  font-size: 18px;
+  line-height: 1;
+}
+.bedrock-tr-close:hover {
+  color: #4b5563;
+}
+.bedrock-tr-bubble-body {
+  margin-top: 2px;
+}
+.bedrock-tr-orig {
+  color: #6b7280;
+  font-size: 12px;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px dashed #e5e7eb;
+  max-height: 120px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+}
+.bedrock-tr-result {
+  color: #111827;
+  white-space: pre-wrap;
+}
+.bedrock-tr-error {
+  color: #b91c1c;
+  white-space: pre-wrap;
+  font-size: 13px;
+}
+
+/* 원본+번역 비교 보기에서 삽입되는 번역 블록 */
+.bedrock-tr-dual {
+  color: #1d4ed8 !important;
+  background: rgba(37, 99, 235, 0.1);
+  border-left: 3px solid #2563eb;
+  padding: 4px 10px;
+  margin: 2px 0 8px;
+  border-radius: 0 4px 4px 0;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  white-space: pre-wrap;
+}
+
+/* 어두운 배경의 페이지: 밝은 하늘색 + 더 진한 배경칩으로 대비 확보 */
+.bedrock-tr-dual.bedrock-tr-dual-dark {
+  color: #93c5fd !important;
+  background: rgba(96, 165, 250, 0.15);
+  border-left-color: #60a5fa;
+}
+
+.bedrock-tr-toast {
+  position: fixed;
+  z-index: 2147483647;
+  bottom: 20px;
+  right: 20px;
+  background: #111827;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 8px;
+  font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  font-size: 13px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+.bedrock-tr-spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(0, 0, 0, 0.15);
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: bedrock-tr-spin 0.7s linear infinite;
+  vertical-align: middle;
+}
+@keyframes bedrock-tr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

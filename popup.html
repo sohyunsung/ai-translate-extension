@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="header">
+      <span class="title">Bedrock 번역기</span>
+    </div>
+
+    <div id="no-key" class="warn hidden">
+      API 키가 없습니다.
+      <a href="#" id="open-options-link">옵션에서 설정</a>
+    </div>
+
+    <div class="row">
+      <label for="targetLang">번역 언어</label>
+      <select id="targetLang">
+        <option value="한국어">한국어</option>
+        <option value="English">English</option>
+        <option value="日本語">日本語</option>
+        <option value="中文">中文(简体)</option>
+        <option value="Español">Español</option>
+        <option value="Tiếng Việt">Tiếng Việt</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>보기 방식</label>
+      <div class="seg">
+        <button class="seg-btn active" data-mode="replace">원본 대체</button>
+        <button class="seg-btn" data-mode="dual">원본+번역</button>
+      </div>
+    </div>
+
+    <button id="translatePage" class="primary">전체 번역</button>
+    <button id="restore" class="ghost">원본 복원</button>
+
+    <div class="hint">
+      드래그 후 뜨는 <b>번역</b> 버튼 또는 우클릭 메뉴로 선택 영역만 번역할 수
+      있습니다.
+    </div>
+    <div id="status" class="status"></div>
+
+    <div class="footer">
+      <a href="#" id="open-options">설정</a>
+    </div>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
