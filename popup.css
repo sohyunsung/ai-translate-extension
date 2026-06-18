@@ -83,6 +83,17 @@ button.ghost {
 button.ghost:hover {
   background: #f9fafb;
 }
+.check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #374151;
+  margin: 6px 0 2px;
+}
+.check input {
+  width: auto;
+}
 .hint {
   margin-top: 12px;
   font-size: 12px;

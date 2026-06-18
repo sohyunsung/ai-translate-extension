@@ -180,14 +180,38 @@
     return rect.width > 0 || rect.height > 0;
   }
 
+  // 본문만 번역 모드: 헤더/푸터/내비/사이드바 등 페이지 크롬 제외
+  const CHROME_SELECTOR =
+    'header, footer, nav, aside, [role="banner"], [role="navigation"], ' +
+    '[role="contentinfo"], [role="complementary"], [aria-hidden="true"]';
+
+  // 본문 컨테이너 추정 (리더 모드 비슷): main / [role=main] / 가장 긴 article
+  function pickMainRoot() {
+    const explicit = document.querySelector('main, [role="main"]');
+    if (explicit && explicit.innerText.trim().length > 200) return explicit;
+    let best = null;
+    let bestLen = 0;
+    for (const a of document.querySelectorAll("article")) {
+      const len = a.innerText.trim().length;
+      if (len > bestLen) {
+        best = a;
+        bestLen = len;
+      }
+    }
+    return best && bestLen > 200 ? best : null;
+  }
+
   // 텍스트를 가진 "잎(leaf) 블록" 요소만 수집 (중복 번역 방지)
-  function collectLeafBlocks() {
-    const all = Array.from(document.body.querySelectorAll(BLOCK_SELECTOR));
+  function collectLeafBlocks(bodyOnly) {
+    const root = bodyOnly ? pickMainRoot() || document.body : document.body;
+    const all = Array.from(root.querySelectorAll(BLOCK_SELECTOR));
     const result = [];
     for (const el of all) {
       if (SKIP_TAGS.has(el.tagName)) continue;
       if (el.closest(".bedrock-tr-ui")) continue;
       if (el.dataset.bedrockTr) continue; // 이미 번역됨
+      // 본문만 모드: 페이지 크롬(헤더/푸터/내비/사이드바) 안의 요소 제외
+      if (bodyOnly && el.closest(CHROME_SELECTOR)) continue;
       // 후손에 또 다른 블록이 있으면 잎이 아님 → 건너뜀(후손이 번역됨)
       if (el.querySelector(BLOCK_SELECTOR)) continue;
       if (!isVisible(el)) continue;
@@ -224,27 +248,47 @@
     translating = true;
     showToast("페이지 번역 중…", true);
     try {
-      const blocks = collectLeafBlocks();
+      const { bodyOnly = true } = await chrome.storage.local.get("bodyOnly");
+      const blocks = collectLeafBlocks(bodyOnly);
       if (blocks.length === 0) {
         showToast("번역할 텍스트를 찾지 못했습니다.");
         return { ok: true, count: 0 };
       }
       const chunks = chunkBlocks(blocks);
+      // 여러 묶음을 동시에 호출(직렬 → 병렬)해 속도 향상
+      const CONCURRENCY = 4;
+      let next = 0;
       let done = 0;
-      for (const chunk of chunks) {
-        const segments = chunk.map((el) => el.innerText.trim());
-        const resp = await sendBg({ type: "translateBatch", segments });
-        if (!resp || !resp.ok) {
-          showToast("⚠ " + (resp?.error || "번역 실패"));
-          return { ok: false, error: resp?.error };
+      let failedBlocks = 0;
+      let lastError = null;
+
+      async function worker() {
+        while (next < chunks.length) {
+          const chunk = chunks[next++];
+          const segments = chunk.map((el) => el.innerText.trim());
+          const resp = await sendBg({ type: "translateBatch", segments });
+          if (!resp || !resp.ok) {
+            // 실패한 묶음은 원문 유지하고 계속 진행
+            failedBlocks += chunk.length;
+            lastError = resp?.error || "번역 실패";
+          } else {
+            chunk.forEach((el, i) => applyTranslation(el, resp.result[i], mode));
+          }
+          done += chunk.length;
+          showToast(`페이지 번역 중… (${done}/${blocks.length})`, true);
         }
-        chunk.forEach((el, i) => applyTranslation(el, resp.result[i], mode));
-        done += chunk.length;
-        showToast(`페이지 번역 중… (${done}/${blocks.length})`, true);
       }
-      showToast(`번역 완료 (${blocks.length}개 블록)`);
+
+      const workers = Math.min(CONCURRENCY, chunks.length);
+      await Promise.all(Array.from({ length: workers }, () => worker()));
+
+      if (failedBlocks > 0) {
+        showToast(`완료 — 일부 실패 ${failedBlocks}블록 (${lastError || ""})`);
+      } else {
+        showToast(`번역 완료 (${blocks.length}개 블록)`);
+      }
       markAutoPage(mode);
-      return { ok: true, count: blocks.length };
+      return { ok: true, count: blocks.length - failedBlocks, failed: failedBlocks };
     } finally {
       translating = false;
     }

@@ -75,6 +75,12 @@ async function init() {
     chrome.storage.local.set({ targetLang: $("targetLang").value });
   });
 
+  // 본문만 토글
+  $("bodyOnly").checked = settings.bodyOnly !== false;
+  $("bodyOnly").addEventListener("change", () => {
+    chrome.storage.local.set({ bodyOnly: $("bodyOnly").checked });
+  });
+
   // 보기 방식 토글
   document.querySelectorAll(".seg-btn").forEach((btn) => {
     btn.addEventListener("click", () => {

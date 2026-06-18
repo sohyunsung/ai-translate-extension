@@ -63,7 +63,8 @@ async function load() {
     "region",
     "modelId",
     "targetLang",
-    "persistTranslation"
+    "persistTranslation",
+    "bodyOnly"
   ]);
   $("provider").value = s.provider || "bedrock";
   if (s.openrouterApiKey) $("orApiKey").value = s.openrouterApiKey;
@@ -80,6 +81,7 @@ async function load() {
   if (s.region) $("region").value = s.region;
   if (s.targetLang) $("targetLang").value = s.targetLang;
   $("persistTranslation").checked = s.persistTranslation !== false;
+  $("bodyOnly").checked = s.bodyOnly !== false;
   syncAuthVisibility();
 
   const modelId = s.modelId || "apac.amazon.nova-lite-v1:0";
@@ -230,7 +232,8 @@ $("save").addEventListener("click", async () => {
     region: $("region").value,
     modelId: modelId || "apac.amazon.nova-lite-v1:0",
     targetLang: $("targetLang").value,
-    persistTranslation: $("persistTranslation").checked
+    persistTranslation: $("persistTranslation").checked,
+    bodyOnly: $("bodyOnly").checked
   });
 
   $("saved").textContent = "✓ 저장됨";
