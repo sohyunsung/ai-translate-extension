@@ -4,6 +4,14 @@
 
 웹페이지를 AI로 번역하는 **오픈소스** Chrome 확장프로그램입니다. 번역 백엔드로 **AWS Bedrock**(Amazon Nova)과 **OpenRouter**(GPT/Gemini/Claude 등)를 선택할 수 있습니다.
 
+## 미리보기
+
+원본 + 번역 비교 보기 (번역 전 → 후):
+
+| 번역 전 | 번역 후 |
+|---|---|
+| ![번역 전](docs/images/demo-before.png) | ![번역 후](docs/images/demo-after.png) |
+
 ## 기능
 
 1. **드래그 선택 번역** — 텍스트를 드래그하면 뜨는 `번역` 버튼, 또는 우클릭 메뉴 → *선택 영역 번역*
