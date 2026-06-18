@@ -1,6 +1,8 @@
 # AI 번역 확장프로그램 (ai-translate-extension)
 
-웹페이지를 AI로 번역하는 Chrome 확장프로그램입니다. 번역 백엔드로 **AWS Bedrock**(Amazon Nova)과 **OpenRouter**(GPT/Gemini/Claude 등)를 선택할 수 있습니다.
+> An open-source Chrome extension that translates web pages with AWS Bedrock (Amazon Nova) or OpenRouter (GPT / Gemini / Claude, …). MIT licensed.
+
+웹페이지를 AI로 번역하는 **오픈소스** Chrome 확장프로그램입니다. 번역 백엔드로 **AWS Bedrock**(Amazon Nova)과 **OpenRouter**(GPT/Gemini/Claude 등)를 선택할 수 있습니다.
 
 ## 기능
 
@@ -95,3 +97,16 @@ OpenAI 호환 API(`chat/completions`)로 여러 LLM을 호출합니다.
 - 전체 번역은 문단 단위(`p`, `h1~h6`, `li`, `td` 등)로 처리하며, 원본 대체 모드에서는 인라인 서식(굵게/링크)이 단순 텍스트로 바뀔 수 있습니다.
 - 동적으로 로드되는 콘텐츠는 다시 번역을 실행해야 반영됩니다.
 - `chrome://`, 웹스토어, PDF 뷰어 등 일부 페이지에서는 콘텐츠 스크립트가 동작하지 않습니다.
+
+## 기여 (Contributing)
+
+이슈·PR 환영합니다. 빌드 도구·번들러 없이 순수 JS/HTML/CSS로 구성돼 있어, 폴더를 그대로 `chrome://extensions`에 압축해제 로드하면 바로 개발할 수 있습니다.
+
+- `manifest.json` — MV3 설정
+- `background.js` — 번역 백엔드 호출(Bedrock SigV4 / API 키 / SSO, OpenRouter), 캐시·사용량
+- `content.js` — 페이지 내 UI(선택 번역/전체 번역/비교/복원), 본문 추정
+- `options.*` / `popup.*` — 설정 및 팝업
+
+## 라이선스
+
+[MIT](LICENSE) — 자유롭게 사용·수정·배포할 수 있습니다.
