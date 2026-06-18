@@ -95,6 +95,27 @@
     removeBubble();
   });
 
+  // 헤더를 잡고 끌면 말풍선 이동
+  function enableDrag(box, handle) {
+    handle.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const startLeft = parseFloat(box.style.left) || 0;
+      const startTop = parseFloat(box.style.top) || 0;
+      function onMove(ev) {
+        box.style.left = `${startLeft + (ev.clientX - startX)}px`;
+        box.style.top = `${startTop + (ev.clientY - startY)}px`;
+      }
+      function onUp() {
+        document.removeEventListener("mousemove", onMove);
+        document.removeEventListener("mouseup", onUp);
+      }
+      document.addEventListener("mousemove", onMove);
+      document.addEventListener("mouseup", onUp);
+    });
+  }
+
   async function showSelectionTranslation(text, rect) {
     removeBubble();
     bubble = document.createElement("div");
@@ -111,18 +132,29 @@
     bubble.style.top = `${top}px`;
     bubble.style.left = `${left}px`;
 
+    // 드래그 이동용 헤더(제목줄) + 닫기 버튼
+    const header = document.createElement("div");
+    header.className = "bedrock-tr-drag";
+    const title = document.createElement("span");
+    title.className = "bedrock-tr-title";
+    title.textContent = "번역";
     const close = document.createElement("div");
     close.className = "bedrock-tr-close";
     close.textContent = "×";
+    close.addEventListener("mousedown", (e) => e.stopPropagation());
     close.addEventListener("click", removeBubble);
+    header.appendChild(title);
+    header.appendChild(close);
 
     const body = document.createElement("div");
     body.className = "bedrock-tr-bubble-body";
     body.innerHTML = '<span class="bedrock-tr-spinner"></span> 번역 중…';
 
-    bubble.appendChild(close);
+    bubble.appendChild(header);
     bubble.appendChild(body);
     document.body.appendChild(bubble);
+
+    enableDrag(bubble, header);
 
     const resp = await sendBg({ type: "translateText", text });
     if (!resp || !resp.ok) {

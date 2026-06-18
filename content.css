@@ -21,31 +21,56 @@
 .bedrock-tr-bubble {
   position: absolute;
   z-index: 2147483647;
-  max-width: 380px;
+  width: 340px;
+  min-width: 220px;
+  min-height: 110px;
+  max-width: 90vw;
+  max-height: 80vh;
   background: #ffffff;
   color: #111827;
   border: 1px solid #e5e7eb;
   border-radius: 10px;
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
-  padding: 12px 14px 14px;
   font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   font-size: 14px;
   line-height: 1.5;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* resize 핸들 표시를 위해 */
+  resize: both; /* 우하단 모서리로 크기 조절 */
+}
+/* 드래그 이동용 헤더 */
+.bedrock-tr-drag {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: #f3f4f6;
+  border-bottom: 1px solid #e5e7eb;
+  border-radius: 10px 10px 0 0;
+  cursor: move;
+  user-select: none;
+  flex: 0 0 auto;
+}
+.bedrock-tr-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b7280;
 }
 .bedrock-tr-close {
-  position: absolute;
-  top: 4px;
-  right: 8px;
   cursor: pointer;
   color: #9ca3af;
   font-size: 18px;
   line-height: 1;
+  padding: 0 2px;
 }
 .bedrock-tr-close:hover {
   color: #4b5563;
 }
 .bedrock-tr-bubble-body {
-  margin-top: 2px;
+  padding: 10px 14px 14px;
+  overflow-y: auto;
+  flex: 1 1 auto;
 }
 .bedrock-tr-orig {
   color: #6b7280;
@@ -53,8 +78,6 @@
   padding-bottom: 8px;
   margin-bottom: 8px;
   border-bottom: 1px dashed #e5e7eb;
-  max-height: 120px;
-  overflow-y: auto;
   white-space: pre-wrap;
 }
 .bedrock-tr-result {
