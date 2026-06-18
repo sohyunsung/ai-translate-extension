@@ -53,7 +53,8 @@ async function init() {
   );
 
   let hasCreds;
-  if (settings.authMode === "tempCreds")
+  if (settings.provider === "openrouter") hasCreds = settings.openrouterApiKey;
+  else if (settings.authMode === "tempCreds")
     hasCreds = settings.accessKeyId && settings.secretAccessKey;
   else if (settings.authMode === "sso")
     hasCreds = settings.ssoStartUrl && settings.ssoAccountId && settings.ssoRoleName;

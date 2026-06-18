@@ -73,8 +73,38 @@
     </style>
   </head>
   <body>
-    <h1>Bedrock 번역기 설정</h1>
+    <h1>번역기 설정</h1>
 
+    <label for="provider">번역 백엔드</label>
+    <select id="provider">
+      <option value="bedrock">AWS Bedrock</option>
+      <option value="openrouter">OpenRouter</option>
+    </select>
+
+    <div id="openrouterSection" style="display: none">
+      <label for="orApiKey">OpenRouter API 키</label>
+      <input id="orApiKey" type="password" placeholder="sk-or-v1-..." autocomplete="off" />
+      <div class="hint">
+        <a href="https://openrouter.ai/keys" target="_blank">openrouter.ai/keys</a>
+        에서 발급한 키를 넣으세요.
+      </div>
+      <label for="orModel">모델</label>
+      <input id="orModel" type="text" placeholder="openai/gpt-4o-mini" list="orModelList" />
+      <datalist id="orModelList">
+        <option value="openai/gpt-4o-mini"></option>
+        <option value="google/gemini-2.0-flash-001"></option>
+        <option value="anthropic/claude-haiku-4.5"></option>
+        <option value="meta-llama/llama-3.3-70b-instruct"></option>
+        <option value="deepseek/deepseek-chat"></option>
+      </datalist>
+      <div class="hint">
+        OpenRouter 모델 ID 형식(<code>provider/model</code>). 가성비는
+        <code>openai/gpt-4o-mini</code> / <code>google/gemini-2.0-flash-001</code>
+        추천. 비용은 OpenRouter 대시보드에서 확인하세요.
+      </div>
+    </div>
+
+    <div id="bedrockSection">
     <label for="authMode">인증 방식</label>
     <select id="authMode">
       <option value="apiKey">Bedrock API 키 (Bearer)</option>
@@ -148,6 +178,7 @@
       <label for="customModel">커스텀 모델 ID</label>
       <input id="customModel" type="text" placeholder="예: apac.amazon.nova-lite-v1:0" />
     </div>
+    </div><!-- /bedrockSection -->
 
     <label for="targetLang">기본 번역 언어</label>
     <select id="targetLang">

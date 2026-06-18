@@ -7,6 +7,12 @@ const PRESETS = [
   "apac.amazon.nova-pro-v1:0"
 ];
 
+function syncProviderVisibility() {
+  const or = $("provider").value === "openrouter";
+  $("openrouterSection").style.display = or ? "block" : "none";
+  $("bedrockSection").style.display = or ? "none" : "block";
+}
+
 function syncCustomVisibility() {
   const isCustom = $("modelPreset").value === "__custom__";
   $("customWrap").style.display = isCustom ? "block" : "none";
@@ -42,6 +48,9 @@ async function renderSsoStatus() {
 
 async function load() {
   const s = await chrome.storage.local.get([
+    "provider",
+    "openrouterApiKey",
+    "openrouterModel",
     "authMode",
     "apiKey",
     "accessKeyId",
@@ -56,6 +65,9 @@ async function load() {
     "targetLang",
     "persistTranslation"
   ]);
+  $("provider").value = s.provider || "bedrock";
+  if (s.openrouterApiKey) $("orApiKey").value = s.openrouterApiKey;
+  $("orModel").value = s.openrouterModel || "openai/gpt-4o-mini";
   $("authMode").value = s.authMode || "apiKey";
   if (s.apiKey) $("apiKey").value = s.apiKey;
   if (s.accessKeyId) $("accessKeyId").value = s.accessKeyId;
@@ -78,6 +90,7 @@ async function load() {
     $("customModel").value = modelId;
   }
   syncCustomVisibility();
+  syncProviderVisibility();
 
   renderUsage();
   renderShortcuts();
@@ -128,7 +141,11 @@ async function renderUsage() {
   } else {
     for (const modelId of models) {
       const m = byModel[modelId];
-      const c = costCell(modelId, m.inputTokens, m.outputTokens);
+      // 제공자가 준 실제 비용이 있으면 그걸 쓰고, 없으면 단가표로 추정
+      const c =
+        m.hasCost && typeof m.cost === "number"
+          ? { text: "$" + m.cost.toFixed(4), value: m.cost }
+          : costCell(modelId, m.inputTokens, m.outputTokens);
       tReq += m.requests;
       tIn += m.inputTokens;
       tOut += m.outputTokens;
@@ -188,6 +205,7 @@ async function renderCache() {
   $("cacheCount").textContent = n.toLocaleString();
 }
 
+$("provider").addEventListener("change", syncProviderVisibility);
 $("modelPreset").addEventListener("change", syncCustomVisibility);
 $("authMode").addEventListener("change", syncAuthVisibility);
 
@@ -197,6 +215,9 @@ $("save").addEventListener("click", async () => {
     preset === "__custom__" ? $("customModel").value.trim() : preset;
 
   await chrome.storage.local.set({
+    provider: $("provider").value,
+    openrouterApiKey: $("orApiKey").value.trim(),
+    openrouterModel: $("orModel").value.trim() || "openai/gpt-4o-mini",
     authMode: $("authMode").value,
     apiKey: $("apiKey").value.trim(),
     accessKeyId: $("accessKeyId").value.trim(),

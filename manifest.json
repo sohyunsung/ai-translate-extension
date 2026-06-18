@@ -6,7 +6,8 @@
   "permissions": ["storage", "unlimitedStorage", "contextMenus", "scripting", "activeTab"],
   "host_permissions": [
     "https://*.amazonaws.com/*",
-    "https://*.awsapps.com/*"
+    "https://*.awsapps.com/*",
+    "https://openrouter.ai/*"
   ],
   "background": {
     "service_worker": "background.js"
