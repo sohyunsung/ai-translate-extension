@@ -2,6 +2,8 @@
 const $ = (id) => document.getElementById(id);
 
 const PRESETS = [
+  "global.anthropic.claude-haiku-4-5-20251001-v1:0",
+  "global.anthropic.claude-sonnet-4-6",
   "apac.amazon.nova-lite-v1:0",
   "apac.amazon.nova-micro-v1:0",
   "apac.amazon.nova-pro-v1:0"
@@ -64,7 +66,8 @@ async function load() {
     "modelId",
     "targetLang",
     "persistTranslation",
-    "bodyOnly"
+    "bodyOnly",
+    "dualStyle"
   ]);
   $("provider").value = s.provider || "bedrock";
   if (s.openrouterApiKey) $("orApiKey").value = s.openrouterApiKey;
@@ -82,9 +85,10 @@ async function load() {
   if (s.targetLang) $("targetLang").value = s.targetLang;
   $("persistTranslation").checked = s.persistTranslation !== false;
   $("bodyOnly").checked = s.bodyOnly !== false;
+  $("dualStyle").value = s.dualStyle || "gray";
   syncAuthVisibility();
 
-  const modelId = s.modelId || "apac.amazon.nova-lite-v1:0";
+  const modelId = s.modelId || "global.anthropic.claude-haiku-4-5-20251001-v1:0";
   if (PRESETS.includes(modelId)) {
     $("modelPreset").value = modelId;
   } else {
@@ -101,6 +105,8 @@ async function load() {
 
 // 모델별 참고 단가 ($/1M 토큰, us-east-1 기준)
 function rateFor(modelId) {
+  if (/claude-haiku-4-5/.test(modelId)) return { in: 1.0, out: 5.0 };
+  if (/claude-sonnet-4-6/.test(modelId)) return { in: 3.0, out: 15.0 };
   if (/nova-micro/.test(modelId)) return { in: 0.035, out: 0.14 };
   if (/nova-lite/.test(modelId)) return { in: 0.06, out: 0.24 };
   if (/nova-pro/.test(modelId)) return { in: 0.8, out: 3.2 };
@@ -154,12 +160,18 @@ async function renderUsage() {
       tCost += c.value;
       const tr = document.createElement("tr");
       tr.style.textAlign = "right";
-      tr.innerHTML =
-        `<td style="text-align:left">${prettyModel(modelId)}</td>` +
+      // 모델명은 사용자가 직접 입력한 값일 수 있으므로 textContent로 넣어 HTML 해석 방지
+      const nameTd = document.createElement("td");
+      nameTd.style.textAlign = "left";
+      nameTd.textContent = prettyModel(modelId);
+      tr.appendChild(nameTd);
+      tr.insertAdjacentHTML(
+        "beforeend",
         `<td>${m.requests.toLocaleString()}</td>` +
-        `<td>${m.inputTokens.toLocaleString()}</td>` +
-        `<td>${m.outputTokens.toLocaleString()}</td>` +
-        `<td>${c.text}</td>`;
+          `<td>${m.inputTokens.toLocaleString()}</td>` +
+          `<td>${m.outputTokens.toLocaleString()}</td>` +
+          `<td>${c.text}</td>`
+      );
       body.appendChild(tr);
     }
     const total = document.createElement("tr");
@@ -230,10 +242,11 @@ $("save").addEventListener("click", async () => {
     ssoAccountId: $("ssoAccountId").value.trim(),
     ssoRoleName: $("ssoRoleName").value.trim(),
     region: $("region").value,
-    modelId: modelId || "apac.amazon.nova-lite-v1:0",
+    modelId: modelId || "global.anthropic.claude-haiku-4-5-20251001-v1:0",
     targetLang: $("targetLang").value,
     persistTranslation: $("persistTranslation").checked,
-    bodyOnly: $("bodyOnly").checked
+    bodyOnly: $("bodyOnly").checked,
+    dualStyle: $("dualStyle").value
   });
 
   $("saved").textContent = "✓ 저장됨";

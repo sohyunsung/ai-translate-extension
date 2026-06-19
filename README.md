@@ -1,8 +1,8 @@
 # AI 번역 확장프로그램 (ai-translate-extension)
 
-> An open-source Chrome extension that translates web pages with AWS Bedrock (Amazon Nova) or OpenRouter (GPT / Gemini / Claude, …). MIT licensed.
+> An open-source Chrome extension that translates web pages with AWS Bedrock (Claude Sonnet / Amazon Nova) or OpenRouter (GPT / Gemini / Claude, …). MIT licensed.
 
-웹페이지를 AI로 번역하는 **오픈소스** Chrome 확장프로그램입니다. 번역 백엔드로 **AWS Bedrock**(Amazon Nova)과 **OpenRouter**(GPT/Gemini/Claude 등)를 선택할 수 있습니다.
+웹페이지를 AI로 번역하는 **오픈소스** Chrome 확장프로그램입니다. 번역 백엔드로 **AWS Bedrock**(Claude Sonnet / Amazon Nova)과 **OpenRouter**(GPT/Gemini/Claude 등)를 선택할 수 있습니다.
 
 ## 미리보기
 
@@ -44,7 +44,7 @@
 
 ## 백엔드 1 — AWS Bedrock (서울 리전)
 
-모델: **Amazon Nova Lite / Micro / Pro** (서울 `apac.` 추론 프로파일). 가성비는 Nova Lite 추천.
+기본 모델은 **Claude Haiku 4.5**(`global.anthropic.claude-haiku-4-5-20251001-v1:0`, 빠르고 저렴)이며, **Claude Sonnet 4.6**(고품질)과 **Amazon Nova Lite / Micro / Pro**도 옵션에서 고를 수 있습니다. 서울 리전에서 **Claude는 `global.` 추론 프로파일**, **Nova는 `apac.` 추론 프로파일**로 호출됩니다.
 
 세 가지 인증 방식 중 선택:
 
@@ -61,9 +61,13 @@
 - 임시 자격증명(~1시간)은 SSO 세션 토큰(~8시간)으로 브라우저 없이 자동 갱신
 
 > Bedrock 사용 시 해당 자격증명/Role에 **`bedrock:InvokeModel`** 권한과 Bedrock **Model access** 활성화가 필요합니다.
+>
+> **Claude 모델(기본 Haiku 4.5)을 쓸 때 주의 2가지:**
+> 1. Bedrock 콘솔 → **Model access**에서 쓰려는 **Anthropic Claude 모델(기본: Claude Haiku 4.5)**을 활성화해야 합니다. (모델마다 따로 켜야 함 → 안 켜면 403)
+> 2. Claude 4.6은 **Global 추론 프로파일**이라 호출 시 IAM 조건키 **`aws:RequestedRegion`** 값이 **`"unspecified"`**가 됩니다. IAM 정책을 특정 리전으로 좁혀뒀다면 **`unspecified`도 함께 허용**해야 403(AccessDenied)이 나지 않습니다.
 
 ### 모델/리전 참고
-- 서울 리전은 `apac.` 접두사 추론 프로파일 사용 (예: `apac.amazon.nova-lite-v1:0`)
+- 서울 리전: **Claude**(Haiku 4.5/Sonnet 4.6)는 `global.` 프로파일, **Nova**는 `apac.` 프로파일(예: `apac.amazon.nova-lite-v1:0`) 사용
 - 모델 ID·리전이 안 맞으면 400(invalid model identifier) / 404 발생
 
 ---
@@ -94,7 +98,7 @@ OpenAI 호환 API(`chat/completions`)로 여러 LLM을 호출합니다.
 
 - 설정 페이지에 **모델별 요청 수 / 입력 토큰 / 출력 토큰 / 비용** 표시
 - **토큰 수는 항상 실측**(제공자 응답의 usage 값). 캐시로 처리된 건 API 호출이 없어 집계되지 않음(= 실제 과금분만)
-- 비용: **OpenRouter는 실제 값**, **Bedrock(Nova)은 토큰 실측 × 참고 단가 추정**
+- 비용: **OpenRouter는 실제 값**, **Bedrock(Claude/Nova)은 토큰 실측 × 참고 단가 추정**
 
 ## 보안 메모
 

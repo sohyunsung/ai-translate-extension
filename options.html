@@ -165,13 +165,19 @@
 
     <label for="modelPreset">모델</label>
     <select id="modelPreset">
-      <option value="apac.amazon.nova-lite-v1:0">Amazon Nova Lite (가성비 추천)</option>
+      <option value="global.anthropic.claude-haiku-4-5-20251001-v1:0">Claude Haiku 4.5 (기본·빠름·저렴)</option>
+      <option value="global.anthropic.claude-sonnet-4-6">Claude Sonnet 4.6 (고품질)</option>
+      <option value="apac.amazon.nova-lite-v1:0">Amazon Nova Lite (가성비)</option>
       <option value="apac.amazon.nova-micro-v1:0">Amazon Nova Micro (최저가)</option>
       <option value="apac.amazon.nova-pro-v1:0">Amazon Nova Pro (고품질)</option>
       <option value="__custom__">직접 입력…</option>
     </select>
     <div class="hint">
-      서울 리전은 <code>apac.</code> 추론 프로파일을 사용합니다.
+      Claude(Haiku 4.5·Sonnet 4.6)는 서울 리전에서 <code>global.</code> 추론 프로파일로,
+      Nova는 <code>apac.</code> 추론 프로파일로 호출됩니다.<br />
+      ⚠ 해당 Claude 모델을 처음 쓰면 ① Bedrock 콘솔 → <b>Model access</b>에서 그 모델
+      (기본: Claude Haiku 4.5) 활성화, ② IAM 정책을 리전으로 좁혔다면 <code>aws:RequestedRegion</code>의
+      <code>unspecified</code>도 허용해야 합니다(Global 프로파일 — 안 하면 403).
     </div>
 
     <div id="customWrap" style="display: none">
@@ -189,6 +195,15 @@
       <option value="Español">Español</option>
       <option value="Tiếng Việt">Tiếng Việt</option>
     </select>
+
+    <label for="dualStyle">원문+번역 배경 스타일</label>
+    <select id="dualStyle">
+      <option value="gray">회색 (기본)</option>
+      <option value="blue">파랑</option>
+    </select>
+    <div class="hint">
+      '원본+번역' 보기에서 번역문 블록의 배경색입니다. 번역문 너비는 항상 원문에 맞춰집니다.
+    </div>
 
     <label style="margin-top: 18px">
       <input type="checkbox" id="bodyOnly" style="width: auto" />
@@ -248,7 +263,7 @@
       2. 좌측 메뉴 <b>API keys</b> → <b>Generate API key</b><br />
       3. Short-term(최대 12시간) 또는 Long-term 선택해 생성<br />
       4. 사용할 모델은 Bedrock → <b>Model access</b>에서 접근 권한이 활성화돼
-      있어야 합니다.
+      있어야 합니다. (기본 모델 <b>Claude Haiku 4.5</b> 포함)
     </div>
 
     <script src="options.js"></script>
