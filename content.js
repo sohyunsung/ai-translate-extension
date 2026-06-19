@@ -255,6 +255,22 @@
     return result;
   }
 
+  // 뷰포트(화면)에 보이는 블록을 먼저, 그 다음 아래쪽, 마지막으로 위쪽 순서로 분리.
+  // 보고 있는 영역을 먼저 번역해 체감 속도를 높이기 위함.
+  function splitByViewport(blocks) {
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    const visible = [];
+    const below = [];
+    const above = [];
+    for (const el of blocks) {
+      const r = el.getBoundingClientRect();
+      if (r.bottom > 0 && r.top < vh) visible.push(el);
+      else if (r.top >= vh) below.push(el);
+      else above.push(el);
+    }
+    return { visible, rest: [...below, ...above] };
+  }
+
   function chunkBlocks(blocks) {
     const chunks = [];
     let cur = [];
@@ -274,19 +290,24 @@
   }
 
   let translating = false;
+  let dualStyle = "gray"; // 원본+번역 블록 배경: 'gray' | 'blue' (옵션 설정, translatePage에서 읽음)
 
   async function translatePage(mode) {
     if (translating) return { ok: false, error: "이미 번역 중입니다." };
     translating = true;
     showToast("페이지 번역 중…", true);
     try {
-      const { bodyOnly = true } = await chrome.storage.local.get("bodyOnly");
+      const { bodyOnly = true, dualStyle: ds = "gray" } =
+        await chrome.storage.local.get(["bodyOnly", "dualStyle"]);
+      dualStyle = ds;
       const blocks = collectLeafBlocks(bodyOnly);
       if (blocks.length === 0) {
         showToast("번역할 텍스트를 찾지 못했습니다.");
         return { ok: true, count: 0 };
       }
-      const chunks = chunkBlocks(blocks);
+      // 화면에 보이는 블록을 별도 묶음으로 맨 앞에 배치 → 먼저 번역됨
+      const { visible, rest } = splitByViewport(blocks);
+      const chunks = [...chunkBlocks(visible), ...chunkBlocks(rest)];
       // 여러 묶음을 동시에 호출(직렬 → 병렬)해 속도 향상
       const CONCURRENCY = 4;
       let next = 0;
@@ -326,6 +347,24 @@
     }
   }
 
+  // 삽입되는 번역 블록이 원문 텍스트와 같은 가로 폭·좌측 위치·글자 크기를 갖도록 맞춘다.
+  // computed style 복제만으로는 max-width/가운데정렬/CSS Grid/Flex를 일반화할 수 없어,
+  // 원문이 실제로 차지한 폭과 좌측 위치를 getBoundingClientRect로 실측해 적용한다.
+  // (반드시 dst를 DOM에 삽입한 뒤 호출 — 위치 실측이 필요)
+  function matchOriginalBox(src, dst) {
+    const cs = window.getComputedStyle(src);
+    const r0 = src.getBoundingClientRect();
+    dst.style.boxSizing = "border-box";
+    dst.style.fontSize = cs.fontSize; // 원문과 같은 글자 크기
+    if (cs.textAlign === "center") dst.style.textAlign = "center"; // 가운데정렬만 따라감
+    dst.style.width = Math.round(r0.width) + "px"; // 원문이 차지한 실제 폭
+    dst.style.maxWidth = "100%"; // 부모보다 좁아져도 넘치지 않게
+    dst.style.justifySelf = "start"; // grid item일 때 트랙 전체로 늘어나는 것 방지
+    // 좌측 가장자리를 원문과 정렬: 현재 위치와 원문 left 차이만큼 margin-left 보정
+    const dx = r0.left - dst.getBoundingClientRect().left;
+    if (Math.abs(dx) > 0.5) dst.style.marginLeft = Math.round(dx) + "px";
+  }
+
   function applyTranslation(el, translated, mode) {
     if (!translated) return;
     if (mode === "dual") {
@@ -334,9 +373,11 @@
       const node = document.createElement("div");
       node.className =
         "bedrock-tr-ui bedrock-tr-dual" +
+        (dualStyle === "blue" ? " bedrock-tr-blue" : "") +
         (isDarkBackground() ? " bedrock-tr-dual-dark" : "");
       node.textContent = translated;
       el.insertAdjacentElement("afterend", node);
+      matchOriginalBox(el, node); // 삽입 후 실측으로 원문과 같은 폭·좌측 위치에 맞춤
       insertedNodes.push(node);
     } else {
       // replace 모드: 원본 보관 후 텍스트 교체
