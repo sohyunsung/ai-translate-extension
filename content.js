@@ -376,8 +376,19 @@
         (dualStyle === "blue" ? " bedrock-tr-blue" : "") +
         (isDarkBackground() ? " bedrock-tr-dual-dark" : "");
       node.textContent = translated;
-      el.insertAdjacentElement("afterend", node);
-      matchOriginalBox(el, node); // 삽입 후 실측으로 원문과 같은 폭·좌측 위치에 맞춤
+      const tag = el.tagName;
+      if (tag === "TD" || tag === "TH" || tag === "CAPTION") {
+        // 표 셀: 셀 "안"에 번역을 쌓아 넣는다.
+        // 형제(<tr> 직속)로 넣으면 브라우저가 익명 셀을 만들어 컬럼 수가 폭증하고
+        // 자동 레이아웃이 원본 컬럼을 최소 폭까지 압축(세로 글자) + matchOriginalBox의
+        // 음수 margin 보정으로 번역이 원문 위에 겹친다.
+        node.style.marginTop = "6px";
+        el.appendChild(node);
+        // matchOriginalBox 생략 — 셀 안에서는 폭 지정 없이 셀 폭을 그대로 따라간다
+      } else {
+        el.insertAdjacentElement("afterend", node);
+        matchOriginalBox(el, node); // 삽입 후 실측으로 원문과 같은 폭·좌측 위치에 맞춤
+      }
       insertedNodes.push(node);
     } else {
       // replace 모드: 원본 보관 후 텍스트 교체
